@@ -1,0 +1,131 @@
+---
+title: "Zipcode"
+author: "Group"
+date: "12/3/2019"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Import data 
+```{r}
+library(tidyverse)
+active_cps <- read_csv("/Users/klaus/Desktop/Rclass/final project/INMATE_ACTIVE_OFFENSES_CPS.csv", na = c("","NA"))
+release_cps <- read_csv("/Users/klaus/Desktop/Rclass/final project/INMATE_RELEASE_OFFENSES_CPS.csv", na = c("","NA"))
+offender_ccs <- read_csv("/Users/klaus/Desktop/Rclass/final project/OFFENDER_OFFENSES_CCS.csv", na = c("","NA"))
+offender_residence <- read_csv("/Users/klaus/Desktop/Rclass/final project/OFFENDER_RESIDENCE.csv", na = c("","NA")) ##there are some zipcode are 0s or 00001 or 9s,they are wrong zip same as "NA" we will just ignore those.
+
+## becase the prpr data(by difination) will be included in cps. we dont need to use that to show offenes.
+```
+
+## tidy active
+```{r}
+active_cps$OffenseDate <- parse_date(active_cps$OffenseDate, format = "%m/%d/%Y %H:%M:%OS")
+active_cps$DateAdjudicated <- parse_date(active_cps$DateAdjudicated, format = "%m/%d/%Y %H:%M:%OS")
+
+active_cps %>%
+  rename(PrisionTerm = 'prisonterm',
+         Adjudication_Charge_Description = 'adjudicationcharge_descr') ->
+  active_cps
+```
+
+## tidy release
+```{r}
+release_cps$OffenseDate <- parse_date(release_cps$OffenseDate, format = "%m/%d/%Y %H:%M:%OS")
+release_cps$DateAdjudicated <- parse_date(release_cps$DateAdjudicated, format = "%m/%d/%Y %H:%M:%OS")
+
+release_cps %>%
+  rename(PrisionTerm = 'prisonterm',
+         Adjudication_Charge_Description = 'adjudicationcharge_descr') %>%
+  select(DCNumber, Sequence, CaseNumber, Adjudication_Charge_Description)->
+  release_cps
+```
+
+## tidy offender
+css
+```{r}
+offender_ccs$OffenseDate <- parse_date(offender_ccs$OffenseDate, format = "%m/%d/%Y %H:%M:%OS")
+offender_ccs$DateAdjudicated <- parse_date(offender_ccs$DateAdjudicated, format = "%m/%d/%Y %H:%M:%OS")
+offender_ccs
+
+offender_ccs %>%
+  rename(Adjudication_Charge_Description = 'adjudicationcharge_descr') ->
+  offender_ccs
+```
+
+## joining
+```{r}
+residence_active_offender <- semi_join(offender_residence, active_cps, by = "DCNumber") ## show which active inmates match current offender and what their residence information are.
+residence_active_offender  ## zipcode shows begin with 3 which is in Florida state only.
+```
+
+```{r}
+residence_release_offender <- semi_join(offender_residence, release_cps, by = "DCNumber") ## same as active
+residence_release_offender
+```
+
+```{r}
+residence_offender <- inner_join(offender_residence, offender_ccs, by = "DCNumber")
+residence_offender
+```
+## residence_active_offender
+```{r}
+residence_active_offender %>% ##not use
+  group_by(ZipCode) %>%
+  summarise(Counts = n()) %>%
+  filter(ZipCode!= "00000" & ZipCode!= "00001" & ZipCode!= "99999", ZipCode!= "NA") ->
+  residence_active_offender
+
+residence_active_offender %>% ## they are really small valuable counts, we will not use active.
+  arrange(-Counts)
+```
+
+## residence release offender
+```{r}
+residence_release_offender %>%
+  group_by(ZipCode) %>%
+  summarise(Counts = n())  %>%
+  filter(ZipCode!= "00000" & ZipCode!= "00001" & ZipCode!= "99999", ZipCode!= "NA") ->
+  residence_release_offender
+
+residence_release_offender %>%
+  arrange(-Counts)
+
+```
+
+## residence offer
+```{r}
+residence_offender %>%
+  group_by(ZipCode) %>%
+  summarise(Counts = n()) %>%
+  filter(ZipCode!= "00000" & ZipCode!= "00001" & ZipCode!= "99999", ZipCode!= "NA") ->
+  residence_offender
+
+residence_offender %>%
+  arrange(-Counts)
+```
+
+## plot
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
