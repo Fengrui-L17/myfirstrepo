@@ -1,0 +1,49 @@
+---
+title: "Jan-15"
+author: "Fengrui Liu"
+date: "2020/1/15"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+library(tidyverse)
+```
+
+
+
+```{r}
+x <- c(3.0000, 5.000, 3.140, -3,15, Inf, -Inf)
+as.logical(x)
+```
+
+```{r}
+as.character(x)
+```
+
+```{r}
+sum(as.logical(x), na.rm = TRUE)
+```
+
+```{r}
+as.numeric(as.logical(x))  ## true is 1, False is 0
+```
+
+```{r}
+x <- c(1,3)
+y <- 1:10
+
+x+y
+```
+
+```{r}
+z <- list(a=c(2,4,6), b = "a rather long string", c = pi, d = list(1,2,3)) 
+z[1:2]
+```
+
+
+
+
